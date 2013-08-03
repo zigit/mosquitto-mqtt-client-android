@@ -1,0 +1,100 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg_row"
+    android:padding="10dip" >
+
+    <TextView
+        android:background="@drawable/bg_home"
+        android:layout_marginBottom="10dip"
+        android:id="@+id/text_status"
+        
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="right"
+        android:text="Connection State" />
+
+   
+
+    <LinearLayout
+        android:layout_weight="1"
+        android:background="@drawable/bg_home"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical" >
+
+        <TextView
+            android:padding="5dip"
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Incomming Message"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <ImageView
+            android:id="@+id/ImageView01"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dip"
+            android:src="@drawable/separator" />
+
+        <ListView
+            android:id="@+id/listView1"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" >
+        </ListView>
+
+    </LinearLayout>
+<ImageView
+    android:padding="10dip"
+            android:id="@+id/imageView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/separator" />
+    
+    <LinearLayout
+        android:gravity="center"
+        android:background="@drawable/bg_home"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp" >
+
+        
+        <TextView
+            android:padding="5dip"
+            android:id="@+id/textView1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/push_a_message"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <EditText
+            android:id="@+id/edit_topicName_field"
+            android:layout_width="fill_parent"
+            android:hint="@string/topic"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName" />
+
+        <EditText
+            android:id="@+id/edit_message_filed"
+            android:layout_width="fill_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:hint="@string/your_message"
+            android:ems="10"
+            android:inputType="textMultiLine" />
+
+        <Button
+            android:id="@+id/button1"
+            android:onClick="OnPushButtonClicked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/push" />
+
+    </LinearLayout>
+
+</LinearLayout>
