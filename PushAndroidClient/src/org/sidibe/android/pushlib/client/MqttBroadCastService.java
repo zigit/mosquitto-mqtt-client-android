@@ -1,5 +1,6 @@
 package org.sidibe.android.pushlib.client;
 
+import org.sidibe.android.pushlib.client.demo.R;
 import org.sidibe.mqtt.android.lib.MqttAndroidClient;
 import org.sidibe.mqtt.android.lib.MqttClientState;
 import org.sidibe.mqtt.android.lib.MqttMessage;
@@ -9,20 +10,23 @@ import org.sidibe.mqtt.android.lib.PushListener;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.support.v4.app.NotificationCompat;
 
 public class MqttBroadCastService extends Service implements PushListener {
 
+	private static final int NOTIFICATION_ID = 0x1212;
 	private MqttAndroidClient mqttClient;
 	public static final String ACTION_PUSH_ARRIVED = "action_push_arrived";
 	public static final String ACTION_STATE_CHANGED = "action_state_changed";
 	public static final String ACTION_PUSH_SEND = "action_push_send";
-	public static final String KEY_STATE = "keystate";
+	public static final String KEY_STATE = "key_state";
 	public static final String KEY_DATA = "key_data";
 	private static final String HOST = "88.191.130.14";
 	private PushSendBrodcast pushSendBroacast;
@@ -41,7 +45,6 @@ public class MqttBroadCastService extends Service implements PushListener {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -57,27 +60,24 @@ public class MqttBroadCastService extends Service implements PushListener {
 		Intent broadcastIntent = new Intent(ACTION_PUSH_ARRIVED);
 		broadcastIntent.putExtra(KEY_DATA, (Parcelable) mqttMessage);
 		sendBroadcast(broadcastIntent);
-		showMessageAsNotification(mqttMessage);
+		showNotification(NOTIFICATION_ID + 1,
+		        getString(R.string.mosquitto_incomming), mqttMessage.toString());
 
 	}
 
-	private void showMessageAsNotification(MqttMessage message) {
-
-		NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		Intent notificationIntent = new Intent(this, DemoActivity.class);
-		notificationIntent.putExtra(KEY_DATA, (Parcelable) message);
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-		        notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-		nm.notify(0, null);
-	}
-
-	private void showConnectionStateAsNotification(MqttClientState clientState) {
-		NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		Intent notificationIntent = new Intent(this, DemoActivity.class);
-		notificationIntent.putExtra(KEY_STATE, clientState);
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-		        notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-		nm.notify(2, null);
+	private void showNotification(int id, String title, String content) {
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+		        this).setSmallIcon(R.drawable.ic_launcher)
+		        .setContentTitle(title).setContentText(content);
+		Intent resultIntent = new Intent(this, DemoActivity.class);
+		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+		stackBuilder.addParentStack(DemoActivity.class);
+		stackBuilder.addNextIntent(resultIntent);
+		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
+		        PendingIntent.FLAG_UPDATE_CURRENT);
+		mBuilder.setContentIntent(resultPendingIntent);
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.notify(id, mBuilder.build());
 	}
 
 	@Override
@@ -85,7 +85,9 @@ public class MqttBroadCastService extends Service implements PushListener {
 		Intent broadcastIntent = new Intent(ACTION_STATE_CHANGED);
 		broadcastIntent.putExtra(KEY_STATE, connectionState);
 		sendBroadcast(broadcastIntent);
-		showConnectionStateAsNotification(connectionState);
+		showNotification(NOTIFICATION_ID,
+		        getString(R.string.mosquitto_client_status),
+		        connectionState.name());
 
 	}
 

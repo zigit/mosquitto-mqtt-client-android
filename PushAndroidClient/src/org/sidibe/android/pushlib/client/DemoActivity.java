@@ -31,22 +31,36 @@ public class DemoActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setContentView(R.layout.activity_main);
+		setupIncommingMessagePart();
+		retrieveIfLaunchFromNotification(getIntent());
 		addBroadCastReceiver();
 		Intent intent = new Intent(this, MqttBroadCastService.class);
 		startService(intent);
-		setupIncommingMessagePart();
 
 	}
 
-	private boolean  retrieveIfLaunchFromNotification(Intent intent) {
-		boolean isLaunchedFromNotification=false;
-		if(intent==null) {
-	        return isLaunchedFromNotification;
-        }
-		
-		MqttClientState clientState
-		return null;
-		
+	private void retrieveIfLaunchFromNotification(Intent intent) {
+		if (intent == null) {
+			return;
+		}
+		Bundle bundle = intent.getExtras();
+		if (bundle == null) {
+			return;
+		}
+		MqttClientState clientState = (MqttClientState) bundle
+		        .getSerializable(MqttBroadCastService.KEY_STATE);
+
+		if (clientState != null) {
+			setupConnectionStatePart(clientState);
+		}
+
+		MqttMessage mqttMessage = (MqttMessage) bundle
+		        .getParcelable(MqttBroadCastService.KEY_STATE);
+		if (mqttMessage != null) {
+			messageAdapter.add(mqttMessage);
+			messageAdapter.notifyDataSetChanged();
+		}
+
 	}
 
 	private void addBroadCastReceiver() {
