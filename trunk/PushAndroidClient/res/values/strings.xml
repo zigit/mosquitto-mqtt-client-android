@@ -9,5 +9,7 @@
     <string name="your_message">your message</string>
     <string name="push">Push</string>
     <string name="client_connection_status_">"Client Connection Status "</string>
+    <string name="mosquitto_client_status">"Mosquitto Client Status "</string>
+    <string name="mosquitto_incomming">"Mosquitto Incomming "</string>
 
 </resources>
