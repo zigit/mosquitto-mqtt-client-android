@@ -11,5 +11,10 @@
     <string name="client_connection_status_">"Client Connection Status "</string>
     <string name="mosquitto_client_status">"Mosquitto Client Status "</string>
     <string name="mosquitto_incomming">"Mosquitto Incomming "</string>
+    <string-array name="spinner_entrie">
+        <item >Delivery_once_no confirmation</item>
+        <item >Delivery least  with confirmation</item>
+        <item >Delivery once with confirmation</item>
+    </string-array>
 
 </resources>

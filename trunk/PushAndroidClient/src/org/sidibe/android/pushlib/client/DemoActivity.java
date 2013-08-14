@@ -1,10 +1,10 @@
 package org.sidibe.android.pushlib.client;
 
+import java.util.ArrayList;
+
 import org.sidibe.android.pushlib.client.demo.R;
 import org.sidibe.mqtt.android.lib.MqttClientState;
 import org.sidibe.mqtt.android.lib.MqttMessage;
-import org.sidibe.mqtt.android.lib.MqttQoS;
-import org.sidibe.mqtt.android.lib.MqttTopic;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -12,54 +12,54 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class DemoActivity extends Activity {
 
-	public static final String DATA_TO_SEND = "sendata";
 	private MqttDataReceiver dataReceiver;
-	private ArrayAdapter<MqttMessage> messageAdapter;
+	private final MessageListAdapter messageAdapter = new MessageListAdapter(
+	        new ArrayList<MqttMessage>());
 	private TextView connectionStateView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setContentView(R.layout.activity_main);
+		connectionStateView = (TextView) findViewById(R.id.text_status);
 		setupIncommingMessagePart();
-		retrieveIfLaunchFromNotification(getIntent());
-		addBroadCastReceiver();
+		boolean result = retrieveIfLaunchFromNotification(getIntent());
+		if (!result) {
+			addBroadCastReceiver();
+		}
 		Intent intent = new Intent(this, MqttBroadCastService.class);
 		startService(intent);
-
 	}
 
-	private void retrieveIfLaunchFromNotification(Intent intent) {
+	private boolean retrieveIfLaunchFromNotification(Intent intent) {
 		if (intent == null) {
-			return;
+			return false;
 		}
 		Bundle bundle = intent.getExtras();
 		if (bundle == null) {
-			return;
+			return false;
 		}
 		MqttClientState clientState = (MqttClientState) bundle
 		        .getSerializable(MqttBroadCastService.KEY_STATE);
 
 		if (clientState != null) {
 			setupConnectionStatePart(clientState);
+			return true;
 		}
 
 		MqttMessage mqttMessage = (MqttMessage) bundle
-		        .getParcelable(MqttBroadCastService.KEY_STATE);
+		        .getParcelable(MqttBroadCastService.KEY_DATA);
 		if (mqttMessage != null) {
 			messageAdapter.add(mqttMessage);
-			messageAdapter.notifyDataSetChanged();
+			return true;
 		}
+		return false;
 
 	}
 
@@ -67,48 +67,30 @@ public class DemoActivity extends Activity {
 		IntentFilter intentCFilter = new IntentFilter(
 		        MqttBroadCastService.ACTION_PUSH_ARRIVED);
 		intentCFilter.addAction(MqttBroadCastService.ACTION_STATE_CHANGED);
+		intentCFilter.addAction(MqttBroadCastService.ACTION_CLIEND_ID);
 		dataReceiver = new MqttDataReceiver();
 		registerReceiver(dataReceiver, intentCFilter);
-		connectionStateView = (TextView) findViewById(R.id.text_status);
 
 	}
 
-	private void setupConnectionStatePart(MqttClientState clientState) {
-		String message = getString(R.string.client_connection_status_);
-		connectionStateView.setText(message + "  " + clientState.name());
+	public void gotoPage(View v) {
+		Intent i = new Intent(this, PushActivity.class);
+		startActivity(i);
+	}
 
+	private void setupConnectionStatePart(MqttClientState clientState) {
+		connectionStateView.setText(clientState.name());
+
+	}
+
+	private void showGeneratedClientId(String clientID) {
+		TextView clientId = (TextView) findViewById(R.id.tv_client_id);
+		clientId.setText(clientID);
 	}
 
 	private void setupIncommingMessagePart() {
 		ListView listView = (ListView) findViewById(R.id.listView1);
-		messageAdapter = new ArrayAdapter<MqttMessage>(this, android.R.id.text1);
 		listView.setAdapter(messageAdapter);
-	}
-
-	private void sendMessage(String topicName, String messageText) {
-		MqttTopic topic = new MqttTopic(topicName);
-		MqttMessage message = new MqttMessage(topic, messageText);
-		message.setQos(MqttQoS.DELIVERY_LEAST_WITH_CONFIRMATION);
-
-		Intent broadcastIntent = new Intent(DATA_TO_SEND);
-		broadcastIntent.putExtra(MqttBroadCastService.KEY_DATA,
-		        (Parcelable) message);
-		sendBroadcast(broadcastIntent);
-	}
-
-	public void OnPushButtonClicked(View v) {
-		EditText topicField = (EditText) findViewById(R.id.edit_topicName_field);
-		String topic = topicField.getText().toString();
-		EditText messageField = (EditText) findViewById(R.id.edit_message_filed);
-		String message = messageField.getText().toString();
-
-		if (message != null && topic != null && message.trim().length() > 0
-		        && topic.trim().length() > 0) {
-			sendMessage(topic, message);
-		} else {
-			Toast.makeText(this, "We avoid to send empty thing to broker",
-			        Toast.LENGTH_LONG).show();
-		}
 	}
 
 	@Override
@@ -127,7 +109,7 @@ public class DemoActivity extends Activity {
 				MqttMessage message = intent.getExtras().getParcelable(
 				        MqttBroadCastService.KEY_DATA);
 				messageAdapter.add(message);
-				messageAdapter.notifyDataSetChanged();
+				return;
 
 			}
 			if (MqttBroadCastService.ACTION_STATE_CHANGED
@@ -135,6 +117,14 @@ public class DemoActivity extends Activity {
 				MqttClientState connectionState = (MqttClientState) intent
 				        .getSerializableExtra(MqttBroadCastService.KEY_STATE);
 				setupConnectionStatePart(connectionState);
+				return;
+
+			}
+			if (MqttBroadCastService.ACTION_CLIEND_ID.equalsIgnoreCase(action)) {
+				String clientID = intent
+				        .getStringExtra(MqttBroadCastService.KEY_CLIENT_ID);
+				showGeneratedClientId(clientID);
+				return;
 
 			}
 		}
