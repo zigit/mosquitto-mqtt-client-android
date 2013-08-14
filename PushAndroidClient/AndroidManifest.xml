@@ -5,8 +5,8 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="16"
-        android:targetSdkVersion="16" />
+        android:minSdkVersion="11"
+        android:targetSdkVersion="11" />
 
     <application
         android:allowBackup="true"
@@ -23,6 +23,7 @@
             </intent-filter>
         </activity>
         <service android:name="org.sidibe.android.pushlib.client.MqttBroadCastService"></service>
+        <activity android:name="org.sidibe.android.pushlib.client.PushActivity"></activity>
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
