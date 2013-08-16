@@ -1,5 +1,7 @@
 package org.sidibe.android.pushlib.client;
 
+import java.util.List;
+
 import org.sidibe.android.pushlib.client.demo.R;
 import org.sidibe.mqtt.android.lib.MqttAndroidClient;
 import org.sidibe.mqtt.android.lib.MqttClientState;
@@ -14,6 +16,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.util.Log;
 
 public class MqttBroadCastService extends Service implements
         MqttPushEventListener {
@@ -36,7 +39,6 @@ public class MqttBroadCastService extends Service implements
 		mqttClient.addPushListener(this);
 		mqttClient.setCleanOnStart(true);
 		mqttClient.bind(new MqttTopic("kalana", 2));
-		sendGeneratedClientId();
 		mqttClient.start();
 		return START_REDELIVER_INTENT;
 	}
@@ -103,9 +105,10 @@ public class MqttBroadCastService extends Service implements
 
 	}
 
-	private void sendGeneratedClientId() {
+	private void sendGeneratedClientId(List<String> strings) {
+		Log.i("Clien ID", strings.toString());
 		Intent broadcastIntent = new Intent(ACTION_CLIEND_ID);
-		broadcastIntent.putExtra(KEY_CLIENT_ID, mqttClient.getIdClient());
+		broadcastIntent.putExtra(KEY_CLIENT_ID, strings.toString());
 		sendBroadcast(broadcastIntent);
 	}
 
@@ -125,6 +128,12 @@ public class MqttBroadCastService extends Service implements
 
 	public boolean isConnected() {
 		return connected;
+
+	}
+
+	@Override
+	public void onClientConnectedOnBroker(List<String> clienIds) {
+		sendGeneratedClientId(clienIds);
 
 	}
 }
